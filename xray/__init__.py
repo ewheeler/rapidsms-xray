@@ -1,4 +1,4 @@
-"""RapidSMS app for split test experiments and event monitoring."""
+"""RapidSMS app for web and SMS split test experiments & event tracking."""
 
 __version_info__ = {
     'major': 0,
