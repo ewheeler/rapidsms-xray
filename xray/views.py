@@ -8,9 +8,13 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from cleaver.experiment import VariantStat
 from cleaver.backend.redis import RedisBackend
+from bitmapist import cohort
+
+from .events import Tracker
 
 # TODO use project config?
 backend = RedisBackend()
+tracker = Tracker()
 
 
 def format_percentage(f):
@@ -58,6 +62,9 @@ def _experiments_data():
 
 
 def experiments(request):
+    cleaver = request.environ['cleaver']
+    tracker.event('xray:web:view_experiments', cleaver.identity)
+    tracker.event('xray:web:active', cleaver.identity)
     return render_to_response(
         "xray/experiments.html",
         {"experiments_data": _experiments_data()},
@@ -65,5 +72,31 @@ def experiments(request):
 
 
 def experiments_json(request):
+    cleaver = request.environ['cleaver']
+    tracker.event('xray:web:view_experiments_json', cleaver.identity)
     return HttpResponse(json.dumps(_experiments_data(), cls=DjangoJSONEncoder),
                         mimetype="application/json")
+
+
+def events(request):
+    html_form = cohort.render_html_form(
+        action_url='/xray/events/data',
+        selections1=[('View experiments', 'xray:web:view_experiments'), ],
+        selections2=[('Use experiments JSON API',
+                      'xray:web:view_experiements_json'), ],
+        time_group='days',
+        select1='xray:web:view_experiments',
+        select2='xray:web:view_experiements_json'
+    )
+    return HttpResponse(html_form, mimetype="text/html")
+
+
+def events_data(request):
+    data = cohort.get_dates_data(select1=request.GET.get('select1'),
+                                 select2=request.GET.get('select2'),
+                                 time_group=request.GET.get('time_group'),
+                                 system='rapidsms-xray')
+
+    html = cohort.render_html_data(data)
+
+    return HttpResponse(html, mimetype="text/html")

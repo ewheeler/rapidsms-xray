@@ -4,23 +4,23 @@ def web_experiments(request):
 
     experiments = {}
 
-    experiments['dashboard_background_color_experiment'] = cleaver(
-        'dashboard_background_color',
+    experiments['web_dashboard_background_color_experiment'] = cleaver(
+        'web_dashboard_background_color',
         ('white', '#FFFFFF'),
         ('grey', '#F3F3F3')
     )
 
     if request.path == '/patients/workspace/':
-        cleaver.score('dashboard_background_color')
+        cleaver.score('web_dashboard_background_color')
 
-    experiments['dashboard_title_experiment'] = cleaver(
-        'dashboard_title',
+    experiments['web_dashboard_title_experiment'] = cleaver(
+        'web_dashboard_title',
         ('RapidSMS 1000 Days', 'RapidSMS 1000 Days'),
         ('1000 Days', '1000 Days'),
         ('Thousand Days', 'Thousand Days')
     )
 
     if request.path == '/patients/workspace/':
-        cleaver.score('dashboard_title')
+        cleaver.score('web_dashboard_title')
 
     return experiments

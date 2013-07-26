@@ -1,4 +1,4 @@
-import hashlib
+import pyhash
 
 import redis
 import phonenumbers
@@ -10,6 +10,13 @@ from .decorators import memoize
 SessionStore = __import__(settings.SESSION_ENGINE,
                           fromlist=['']).SessionStore
 
+# unique ids must be smaller than 2**32 -1 in order
+# to use redis' bitmaps to store event data.
+# the 32 bit version of murmerhash3 should allow us
+# to hash unique user info into integers.
+hasher = pyhash.murmur3_32()
+
+
 # thanks to:
 # http://mobiforge.com/forum/running/analytics/
 # stats-and-unique-vistors-different-mobile
@@ -17,6 +24,9 @@ SessionStore = __import__(settings.SESSION_ENGINE,
 # http://mobiforge.com/developing/blog/useful-x-headers
 headers_for_fingerprint = ['USER-AGENT', 'HOST', 'ACCEPT', 'ACCEPT-LANGUAGE',
                            'ACCEPT-CHARSET', 'X-REAL-IP', 'X-FORWARDED-HOST',
+                           'HTTP-X-REAL-IP', 'HTTP_X_FORWARDED_FOR',
+                           'HTTP_USER_AGENT', 'HTTP_DNT', 'HTTP_ACCEPT',
+                           'HTTP_ACCEPT_LANGUAGE', 'HTTP_ACCEPT_ENCODING',
                            'X-FORWARDED-SERVER', 'X-FORWARDED-FOR',
                            'X-UP-SUBNO', 'X-NOKIA-MSISDN',
                            'X-UP-CALLING-LINE-ID', 'X-HTS-CLID',
@@ -45,7 +55,7 @@ def fingerprint_environ(hashable_environ):
     header_info = []
     for header in headers_for_fingerprint:
         header_info.append(headers_up.get(header, ''))
-    fingerprint = hashlib.md5(''.join(header_info)).hexdigest()
+    fingerprint = hasher(''.join(header_info).replace(' ', ''))
     return fingerprint
 
 
@@ -84,6 +94,9 @@ class Rolodex(object):
     # find browsers used by uid
     # (set) 'bids:{{ uid }}' => (bid,...)
 
+    # invalid msisdn for country, scored by frequency
+    # (sorted set) 'invalid:msisdn:{{ country }}' => ((1234, 22),(5678, 8),...)
+
     def __init__(self, host='localhost', port=6379, db=4, country='UG'):
         assert country in phonenumbers.SUPPORTED_REGIONS
         # TODO allow list of countries?
@@ -96,19 +109,17 @@ class Rolodex(object):
         num = phonenumbers.parse(msisdn, self.country)
         is_valid = phonenumbers.is_valid_number(num)
         if not is_valid:
-            # TODO save metrics about invalid numbers!
-            raise RuntimeError("%s is not a valid number for %s"
-                               % (msisdn, self.country))
+            #raise RuntimeError("%s is not a valid number for %s"
+            #                   % (msisdn, self.country))
+            # create or increment count of  invalid number
+            self.redis.zadd('invalid:msisdn:%s' % self.country, msisdn, 1.0)
+            return msisdn
         return phonenumbers.format_number(num,
                                           phonenumbers.PhoneNumberFormat.E164)
 
-    @staticmethod
-    def _md5(e164_str):
-        return hashlib.md5(e164_str).hexdigest()
-
     def mid_for_msisdn(self, msisdn=None):
         assert msisdn is not None
-        return Rolodex._md5(self.format_msisdn(msisdn))
+        return hasher(self.format_msisdn(msisdn))
 
     def _seen_mid_registered(self, mid):
         self.redis.sadd('midRegistered', mid)
@@ -140,12 +151,12 @@ class Rolodex(object):
         mid = None
         uid = None
         if e164:
-            mid = Rolodex._md5(e164)
+            mid = hasher(e164)
         else:
             # if number cannot be e164 formatted,
             # return hash of string
             # could be an operator's message, etc
-            mid = Rolodex._md5(msisdn)
+            mid = hasher(msisdn)
 
         self._seen_mid(mid, e164)
 
@@ -159,7 +170,6 @@ class Rolodex(object):
         bid = None
         uid = None
         sid = None
-
         hashable_environ = Hashabledict(environ)
         bid = fingerprint_environ(hashable_environ)
 
@@ -172,8 +182,8 @@ class Rolodex(object):
             cookie = {s.split('=')[0].strip(): s.split('=')[1].strip()
                       for s in environ['HTTP_COOKIE'].split(';')}
             if 'sessionid' in cookie:
-                environ['SID'] = cookie['sessionid']
-                sid = cookie['sessionid']
+                sid = hasher(cookie['sessionid'])
+                environ['SID'] = sid
                 session = SessionStore(session_key=cookie['sessionid'])
                 if session.exists(cookie['sessionid']):
                     session.load()

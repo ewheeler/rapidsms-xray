@@ -1,17 +1,12 @@
-import logging
-
-logger = logging.getLogger('rapidsms')
-
-from django.conf import settings
-
 from cleaver.base import Cleaver
 from cleaver.identity import CleaverIdentityProvider
 from cleaver.backend import CleaverBackend
-from cleaver.backend.db import SQLAlchemyBackend
+from cleaver.backend.redis import RedisBackend
 
 from rapidsms.apps.base import AppBase
 
 from .identity import SMSIdentityProvider
+from .events import Tracker
 
 
 class App(AppBase):
@@ -25,14 +20,18 @@ class App(AppBase):
             )
         if not isinstance(cleaver_backend, CleaverBackend):
             raise RuntimeError(
-                '%s must implement cleaver.backend.CleaverBackend' % cleaver_backend
+                '%s must implement cleaver.backend.CleaverBackend' %
+                cleaver_backend
             )
         self._cleaver_backend = cleaver_backend
         self._cleaver_identity = cleaver_identity
 
     def __init__(self, router):
+        # TODO use project config for RedisBackend and Tracker?
         self.__init_cleaver(SMSIdentityProvider(),
-                          SQLAlchemyBackend(settings.CLEAVER_DATABASE))
+                            RedisBackend())
+        # initialize event tracker
+        self.tracker = Tracker()
 
     def filter(self, message):
 
@@ -61,13 +60,15 @@ class App(AppBase):
             if variant:
                 self._cleaver_backend.mark_participant(e.name, variant)
 
+        self.tracker.event('xray:sms:active', cleaver.identity)
+
     def handle(self, message):
 
         if message.text.startswith('wat'):
             cleaver = message.fields['cleaver']
             # test a few responses to 'wat'
             response = cleaver(
-                'wat_response_experiment',
+                'sms_wat_response',
                 ('foo', 'foo'),
                 ('bar', 'bar'),
                 ('baz', 'baz')
@@ -82,4 +83,4 @@ class App(AppBase):
             # object is added to the message's fields
             # property during the `filter` phase
             cleaver = message.fields['cleaver']
-            cleaver.score('wat_response_experiment')
+            cleaver.score('sms_wat_response')
