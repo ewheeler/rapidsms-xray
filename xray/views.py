@@ -33,7 +33,7 @@ def _experiment_data(experiment):
         if control.conversion_rate > 0:
             improvement_from_control =\
                 format_percentage(abs((variant.conversion_rate /
-                                       control.conversion_rate) - 1)),
+                                       control.conversion_rate) - 1))
         variant_data = {
             'name': variant_name,
             'is_control': (variant_name == experiment.control),

@@ -65,6 +65,7 @@
         }
         tr.last td  {
             border-bottom: 0;
+            background: #F9F9F9;
         }
         td span.pill  {
             display: inline-block;
@@ -122,6 +123,7 @@
 
             <div class="results">
                 <table>
+                  <thead>
                     <tr>
                         <th></th>
                         <th></th>
@@ -132,14 +134,17 @@
                         <th>Improvement from Control</th>
                         <th></th>
                     </tr>
-                    {% for variant_name, v in e.variants %}
-                        <tr>
+                  </thead>
+                  <tbody>
+                    {% for variant_name, v in e.variants.items %}
                            {% if forloop.first %}
+                           <tr>
                                 <td class="left"><b>Control</b></td>
                                 <td class="left">
                                     <span class="pill control">X</span>
                                 </td>
                            {% else %}
+                           <tr style="background:{% cycle '#EFF9FB' '#FFF' %};">
                                 <td class="left"><b>Variant</b></td>
                                 <td class="left">
                                 <span class="pill" style="background:{% cycle '#62C2D7' '#7EA407' '#E3690E' %};">
@@ -185,6 +190,7 @@
                         <td />
                         <td />
                     </tr>
+                  </tbody>
                 </table>
             </div>
         </div>
