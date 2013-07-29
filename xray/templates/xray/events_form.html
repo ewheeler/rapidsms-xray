@@ -1,11 +1,22 @@
 {% extends "base.html" %}
 {% load url from future %}
 
+{% block extra_stylesheets %}
+<style>
+  div.event_forms {
+    margin-top: 60px;
+  }
+   
+</style>
+{% endblock extra_stylesheets %}
+
 {% block title %}Event Reports{% endblock title %}
 {% block content %}
+<div class="span12 event_forms">
+
 <form action="{% url 'xray_events_data' %} " method="GET">
     <dl>
-        <dt>People WEB actions</dt>
+        <dt>Web events</dt>
             <dd>
             Show me people who 
 
@@ -50,7 +61,7 @@
 
 <form action="{% url 'xray_events_data' %} " method="GET">
     <dl>
-        <dt>People SMS actions</dt>
+        <dt>SMS events</dt>
             <dd>
             Show me people who 
 
@@ -92,4 +103,5 @@
         <dt><input type="submit" value="Show me results" /></dt>
     </dl>
 </form>
+</div>
 {% endblock content %}
