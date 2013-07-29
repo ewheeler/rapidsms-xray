@@ -1,0 +1,89 @@
+<form action="{% url xray_events_data %} " method="GET">
+    <dl>
+        <dt>People WEB actions</dt>
+            <dd>
+            Show me people who 
+
+            <select name="web_select1">
+              {% for event in web_events %}
+                 {% if event.name == '---' %}
+                     <option value="" disabled="disabled">----</option>
+                 {% else %}
+                     <option value="{{ event.0 }}">{{ event.1 }}</option>
+                 {% endif %}
+              {% endfor %}
+            </select>
+
+            and then came back and
+
+            <select name="web_select2">
+              {% for event in web_events %}
+                 {% if event.name == '---' %}
+                     <option value="" disabled="disabled">----</option>
+                 {% else %}
+                     <option value="{{ event.0 }}">{{ event.1 }}</option>
+                 {% endif %}
+              {% endfor %}
+            </select>
+
+            </dd>
+
+        <dt>Group by</dt>
+            <dd>
+            Group by 
+            <select name="web_time_group">
+              {% for date in web_dates %}
+                  <option value="{{ date }}">{{ date }}</option>
+              {% endfor %}
+            </select>
+            </dd>
+
+            <input type="hidden" name="event_kind" value="web"/>
+        <dt><input type="submit" value="Show me results" /></dt>
+    </dl>
+</form>
+
+<form action="{% url xray_events_data %} " method="GET">
+    <dl>
+        <dt>People SMS actions</dt>
+            <dd>
+            Show me people who 
+
+            <select name="sms_select1">
+              {% for event in sms_events %}
+                 {% if event.name == '---' %}
+                     <option value="" disabled="disabled">----</option>
+                 {% else %}
+                     <option value="{{ event.0 }}">{{ event.1 }}</option>
+                 {% endif %}
+              {% endfor %}
+            </select>
+
+            and then came back and
+
+            <select name="sms_select2">
+              {% for event in sms_events %}
+                 {% if event.name == '---' %}
+                     <option value="" disabled="disabled">----</option>
+                 {% else %}
+                     <option value="{{ event.0 }}">{{ event.1 }}</option>
+                 {% endif %}
+              {% endfor %}
+            </select>
+
+            </dd>
+
+        <dt>Group by</dt>
+            <dd>
+            Group by 
+            <select name="sms_time_group">
+              {% for date in sms_dates %}
+                  <option value="{{ date }}">{{ date }}</option>
+              {% endfor %}
+            </select>
+            </dd>
+
+            <input type="hidden" name="event_kind" value="sms"/>
+        <dt><input type="submit" value="Show me results" /></dt>
+    </dl>
+</form>

@@ -63,8 +63,8 @@ def _experiments_data():
 
 def experiments(request):
     cleaver = request.environ['cleaver']
-    tracker.event('xray:web:view_experiments', cleaver.identity)
-    tracker.event('xray:web:active', cleaver.identity)
+    tracker.web_event('view_experiments', cleaver.identity)
+    tracker.web_event('active', cleaver.identity)
     return render_to_response(
         "xray/experiments.html",
         {"experiments_data": _experiments_data()},
@@ -73,28 +73,52 @@ def experiments(request):
 
 def experiments_json(request):
     cleaver = request.environ['cleaver']
-    tracker.event('xray:web:view_experiments_json', cleaver.identity)
+    tracker.web_event('view_experiments_json', cleaver.identity)
     return HttpResponse(json.dumps(_experiments_data(), cls=DjangoJSONEncoder),
                         mimetype="application/json")
 
 
+def _events_dates(events):
+    dates = {'days': False, 'weeks': False, 'months': False}
+    for event in events:
+        if 'W' in event.date:
+            dates['weeks'] = True
+        elif len(event.date.split('-')) == 3:
+            dates['days'] = True
+        elif len(event.date.split('-')) == 2:
+            dates['months'] = True
+        else:
+            raise RuntimeError('Unknown event date')
+    return [k for k, v in dates.items() if v]
+
+
 def events(request):
-    html_form = cohort.render_html_form(
-        action_url='/xray/events/data',
-        selections1=[('View experiments', 'xray:web:view_experiments'), ],
-        selections2=[('Use experiments JSON API',
-                      'xray:web:view_experiements_json'), ],
-        time_group='days',
-        select1='xray:web:view_experiments',
-        select2='xray:web:view_experiements_json'
-    )
-    return HttpResponse(html_form, mimetype="text/html")
+    events = tracker.get_events()
+
+    web_events = [e for e in events if e.kind == 'web']
+    sms_events = [e for e in events if e.kind == 'sms']
+
+    web_dates = _events_dates(web_events)
+    sms_dates = _events_dates(sms_events)
+
+    return render_to_response(
+        "xray/events_form.html",
+        {"web_events": set([(e.name, e.display) for e in web_events]),
+         "web_dates": web_dates,
+         "sms_events": set([(e.name, e.display) for e in sms_events]),
+         "sms_dates": sms_dates},
+        context_instance=RequestContext(request))
 
 
 def events_data(request):
-    data = cohort.get_dates_data(select1=request.GET.get('select1'),
-                                 select2=request.GET.get('select2'),
-                                 time_group=request.GET.get('time_group'),
+    event_kind = request.GET.get('event_kind')
+    assert event_kind in ['web', 'sms']
+    data = cohort.get_dates_data(select1=request.GET.get('%s_select1' %
+                                                         event_kind),
+                                 select2=request.GET.get('%s_select2' %
+                                                         event_kind),
+                                 time_group=request.GET.get('%s_time_group' %
+                                                            event_kind),
                                  system='rapidsms-xray')
 
     html = cohort.render_html_data(data)

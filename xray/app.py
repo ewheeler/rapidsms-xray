@@ -60,7 +60,7 @@ class App(AppBase):
             if variant:
                 self._cleaver_backend.mark_participant(e.name, variant)
 
-        self.tracker.event('xray:sms:active', cleaver.identity)
+        self.tracker.sms_event('active', cleaver.identity)
 
     def handle(self, message):
 
