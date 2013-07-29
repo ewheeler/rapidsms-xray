@@ -2,9 +2,3 @@
 -e git+git://github.com/ewheeler/cleaver.git@redis-backend#egg=cleaver
 phonenumbers
 bitmapist
-
-# pyhash depends on boost:
-# sudo apt-get install libboost-python-dev
-# or
-# brew install boost
-pyhash

@@ -4,7 +4,9 @@ from django.conf.urls.defaults import url
 from . import views
 
 urlpatterns = patterns('',
-                       url(r'^$', views.experiments, name='xray_experiments'),
+                       url(r'^$', views.index, name='xray_dashboard'),
+                       url(r'^experiments/$', views.experiments,
+                           name='xray_experiments'),
                        url(r'^api/experiments/$',
                            views.experiments_json,
                            name='xray_experiments_json'),

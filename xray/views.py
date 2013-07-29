@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+from collections import defaultdict
+import datetime
 import json
 
 from django.template import RequestContext
@@ -11,10 +13,32 @@ from cleaver.backend.redis import RedisBackend
 from bitmapist import cohort
 
 from .events import Tracker
+from .events import WebWeekEvents
+from .events import SMSWeekEvents
 
 # TODO use project config?
 backend = RedisBackend()
 tracker = Tracker()
+
+
+def index(request):
+    cleaver = request.environ['cleaver']
+    tracker.web_event('view_xray_dashboard', cleaver.identity)
+    tracker.web_event('active', cleaver.identity)
+
+    num_experiments = len(backend.all_experiments())
+    now = datetime.datetime.utcnow()
+
+    num_web_active_this_week = len(WebWeekEvents('active', now.year,
+                                                 now.isocalendar()[1]))
+    num_sms_active_this_week = len(SMSWeekEvents('active', now.year,
+                                                 now.isocalendar()[1]))
+    return render_to_response(
+        "xray/index.html",
+        {"experiments": num_experiments,
+         "web_active": num_web_active_this_week,
+         "sms_active": num_sms_active_this_week},
+        context_instance=RequestContext(request))
 
 
 def format_percentage(f):
@@ -113,14 +137,25 @@ def events(request):
 def events_data(request):
     event_kind = request.GET.get('event_kind')
     assert event_kind in ['web', 'sms']
+    time_group = request.GET.get('%s_time_group' % event_kind)
     data = cohort.get_dates_data(select1=request.GET.get('%s_select1' %
                                                          event_kind),
                                  select2=request.GET.get('%s_select2' %
                                                          event_kind),
-                                 time_group=request.GET.get('%s_time_group' %
-                                                            event_kind),
+                                 time_group=time_group,
                                  system='rapidsms-xray')
 
-    html = cohort.render_html_data(data)
+    averages = defaultdict(int)
 
-    return HttpResponse(html, mimetype="text/html")
+    for column in xrange(2, 15):
+        for row in data:
+            if row[column]:
+                averages['%d-count' % column] += 1
+                averages['%d-total' % column] += row[column]
+
+    return render_to_response(
+        "xray/events_data.html",
+        {"dates_data": data,
+         "time_group": time_group,
+         "averages": averages},
+        context_instance=RequestContext(request))

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% load xray_tags %}
+
+{% block extra_stylesheets %}
+<style>
+  div.content {
+    background: {{ web_xray_dashboard_background_color_variant }};
+  }
+</style>
+{% endblock extra_stylesheets %}
+
+{% block title %}{{ web_xray_dashboard_title_variant }}{% endblock title %}
+{% block content %}
+    <div class="span12" id="xray-dashboard">
+	<div class="page-header"><h1>{{ web_xray_dashboard_title_variant }}</h1></div>
+        <div class="row-fluid">
+            <ul>
+              <li>{{ experiments }} experiments</li>
+              <li>{{ web_active }} active web users this week</li>
+              <li>{{ sms_active }} active sms users this week</li>
+            <ul>
+        <div>
+        <div>
+    <div>
+{% endblock content %}

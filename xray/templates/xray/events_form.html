@@ -1,4 +1,9 @@
-<form action="{% url xray_events_data %} " method="GET">
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block title %}Event Reports{% endblock title %}
+{% block content %}
+<form action="{% url 'xray_events_data' %} " method="GET">
     <dl>
         <dt>People WEB actions</dt>
             <dd>
@@ -43,7 +48,7 @@
     </dl>
 </form>
 
-<form action="{% url xray_events_data %} " method="GET">
+<form action="{% url 'xray_events_data' %} " method="GET">
     <dl>
         <dt>People SMS actions</dt>
             <dd>
@@ -87,3 +92,4 @@
         <dt><input type="submit" value="Show me results" /></dt>
     </dl>
 </form>
+{% endblock content %}

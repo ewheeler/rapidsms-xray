@@ -1,0 +1,34 @@
+.cohort_table {
+  width: 1250px !important;
+  font-family: sans-serif;
+  background-color: #F9F9F9;
+}
+
+.cohort_table .entry {
+    width: 6%;
+}
+
+.cohort_table td, .cohort_table th {
+    padding: 5px 0;
+    text-align: center;
+    border-right: 1px solid #aaa;
+}
+
+.cohort_table td {
+    border-bottom: 1px solid #aaa;
+}
+
+.cohort_table .date {
+    display: inline-block;
+    width: 125px;
+}
+
+.cohort_table .total_count {
+    display: inline-block;
+    width: 50px;
+}
+
+.cohort_table td.avg_row {
+    border-top: 1px solid #aaa !important;
+}
+

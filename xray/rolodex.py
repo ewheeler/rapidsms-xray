@@ -1,21 +1,12 @@
-import pyhash
+import hashlib
 
 import redis
 import phonenumbers
 
 from django.conf import settings
 
-from .decorators import memoize
-
 SessionStore = __import__(settings.SESSION_ENGINE,
                           fromlist=['']).SessionStore
-
-# unique ids must be smaller than 2**32 -1 in order
-# to use redis' bitmaps to store event data.
-# the 32 bit version of murmerhash3 should allow us
-# to hash unique user info into integers.
-hasher = pyhash.murmur3_32()
-
 
 # thanks to:
 # http://mobiforge.com/forum/running/analytics/
@@ -46,17 +37,6 @@ class Hashabledict(dict):
     # from http://stackoverflow.com/a/16162138
     def __hash__(self):
         return hash((frozenset(self), frozenset(self.itervalues())))
-
-
-@memoize
-def fingerprint_environ(hashable_environ):
-    headers_up = dict(((k.upper(), v) for k, v in hashable_environ.iteritems()
-                       if isinstance(v, str)))
-    header_info = []
-    for header in headers_for_fingerprint:
-        header_info.append(headers_up.get(header, ''))
-    fingerprint = hasher(''.join(header_info).replace(' ', ''))
-    return fingerprint
 
 
 class Rolodex(object):
@@ -102,6 +82,29 @@ class Rolodex(object):
         # TODO allow list of countries?
         self.country = country
         self.redis = redis.Redis(host=host, port=port, db=db)
+        self.identity_counter = self.redis.get('xray_identity_counter')
+        if not self.identity_counter:
+            self.redis.incrby('xray_identity_counter', 1)
+
+    def xid(self, hashable):
+
+        # unique ids must be smaller than 2**32 -1 in order
+        # to use redis' bitmaps to store event data.
+        # and the smaller, the better, as it will use less RAM.
+        # so, for each unique md5 hash, issue an integer
+
+        hashed = hashlib.md5(hashable).hexdigest()
+
+        existing = self.redis.get('xid:%s' % hashed)
+        if existing:
+            return existing
+
+        # increment counter
+        integer_id = self.redis.incrby('xray_identity_counter', 1)
+        # set maps
+        self.redis.set('xid:%s' % hashed, integer_id)
+        self.redis.set('xid:%s' % integer_id, hashed)
+        return integer_id
 
     def format_msisdn(self, msisdn=None):
         """ given a msisdn, return in E164 format """
@@ -119,7 +122,7 @@ class Rolodex(object):
 
     def mid_for_msisdn(self, msisdn=None):
         assert msisdn is not None
-        return hasher(self.format_msisdn(msisdn))
+        return self.xid(self.format_msisdn(msisdn))
 
     def _seen_mid_registered(self, mid):
         self.redis.sadd('midRegistered', mid)
@@ -151,12 +154,12 @@ class Rolodex(object):
         mid = None
         uid = None
         if e164:
-            mid = hasher(e164)
+            mid = self.xid(e164)
         else:
             # if number cannot be e164 formatted,
             # return hash of string
             # could be an operator's message, etc
-            mid = hasher(msisdn)
+            mid = self.xid(msisdn)
 
         self._seen_mid(mid, e164)
 
@@ -166,12 +169,22 @@ class Rolodex(object):
 
         return {'mid': mid, 'uid': uid}
 
+    def fingerprint_environ(self, hashable_environ):
+        headers_up = dict(((k.upper(), v) for k, v
+                           in hashable_environ.iteritems()
+                           if isinstance(v, str)))
+        header_info = []
+        for header in headers_for_fingerprint:
+            header_info.append(headers_up.get(header, ''))
+        xid = self.xid(''.join(header_info).replace(' ', ''))
+        return xid
+
     def lookup_browser(self, environ):
         bid = None
         uid = None
         sid = None
         hashable_environ = Hashabledict(environ)
-        bid = fingerprint_environ(hashable_environ)
+        bid = self.fingerprint_environ(hashable_environ)
 
         if self.ids_for_bid(bid):
             self._seen_bid(bid, uid, sid)
@@ -182,7 +195,7 @@ class Rolodex(object):
             cookie = {s.split('=')[0].strip(): s.split('=')[1].strip()
                       for s in environ['HTTP_COOKIE'].split(';')}
             if 'sessionid' in cookie:
-                sid = hasher(cookie['sessionid'])
+                sid = self.xid(cookie['sessionid'])
                 environ['SID'] = sid
                 session = SessionStore(session_key=cookie['sessionid'])
                 if session.exists(cookie['sessionid']):

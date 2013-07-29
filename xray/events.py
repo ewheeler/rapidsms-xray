@@ -11,8 +11,8 @@ class Tracker(object):
 
     def _event(self, event_name, identifier, system='rapidsms-xray',
                now=None, track_hourly=None):
-        bitmapist.mark_event(event_name, identifier,
-                             system, now, track_hourly)
+        bitmapist.mark_event(event_name=event_name, uuid=identifier,
+                             system=system, now=now, track_hourly=track_hourly)
 
     def web_event(self, event_name, identifier, system='rapidsms-xray',
                   now=None, track_hourly=None):
@@ -37,3 +37,81 @@ class Tracker(object):
             events.append(Event._make((prefix, kind, event_name, event_date,
                                        event_display)))
         return events
+
+
+# TODO pypi has old version without  bitmapist.MixinEventsMisc (which replaces
+# MixinEventsMarked)
+class WebWeekEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                    bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, week, system='rapidsms-xray'):
+        event_name = 'xray:web:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               'W%s-%s' % (year, week))
+
+
+class SMSWeekEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                    bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, week, system='rapidsms-xray'):
+        event_name = 'xray:sms:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               'W%s-%s' % (year, week))
+
+
+class WebMonthEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                     bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, month, system='rapidsms-xray'):
+        event_name = 'xray:web:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               '%s-%s' % (year, month))
+
+
+class SMSMonthEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                     bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, month, system='rapidsms-xray'):
+        event_name = 'xray:sms:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               '%s-%s' % (year, month))
+
+
+class WebDayEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                   bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, month, day, system='rapidsms-xray'):
+        event_name = 'xray:web:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               '%s-%s-%s' % (year, month, day))
+
+
+class SMSDayEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                   bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, month, day, system='rapidsms-xray'):
+        event_name = 'xray:sms:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               '%s-%s-%s' % (year, month, day))
+
+
+class WebHourEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                    bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, month, day, hour,
+                 system='rapidsms-xray'):
+        event_name = 'xray:web:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               '%s-%s-%s-%s' %
+                                               (year, month, day, hour))
+
+
+class SMSHourEvents(bitmapist.MixinCounts, bitmapist.MixinContains,
+                    bitmapist.MixinEventsMarked):
+    def __init__(self, event_name, year, month, day, hour,
+                 system='rapidsms-xray'):
+        event_name = 'xray:sms:%s' % event_name
+        self.system = system
+        self.redis_key = bitmapist._prefix_key(event_name,
+                                               '%s-%s-%s-%s' %
+                                               (year, month, day, hour))
