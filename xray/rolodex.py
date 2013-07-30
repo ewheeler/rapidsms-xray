@@ -47,6 +47,8 @@ class Rolodex(object):
     # (string) 'uid:{{ e164 }}' => uid
     # find uid from mid
     # (string) 'uid:{{ mid }}' => uid
+    # find uid from bid
+    # (string) 'uid:{{ bid }}' => uid
 
     # find phone number from mid
     # (string) 'e164:{{ mid }}' => e164
@@ -142,10 +144,20 @@ class Rolodex(object):
         self.redis.zincrby('bidCounts', bid, 1.0)
         if uid is not None:
             self.redis.hmset('ids:%s' % bid, {'uid': uid, 'sid': sid})
+            # cache only for 2 minutes. if browser activity continues, value
+            # will be recached
+            self.redis.expire('ids:%s' % bid, 120)
+            return True
+        return None
 
     def ids_for_bid(self, bid):
         if self.redis.hexists('ids:%s' % bid, 'uid'):
             return self.redis.hgetall('ids:%s' % bid)
+        return None
+
+    def expire_bid(self, bid):
+        if self.redis.exists('ids:%s' % bid):
+            return self.redis.delete('ids:%s' % bid)
         return None
 
     def lookup_msisdn(self, msisdn=None):

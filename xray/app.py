@@ -58,7 +58,8 @@ class App(AppBase):
                 e.name
             )
             if variant:
-                self._cleaver_backend.mark_participant(e.name, variant)
+                self._cleaver_backend.mark_participant(cleaver.identity,
+                                                       e.name, variant)
 
         self.tracker.sms_event('active', cleaver.identity)
 
