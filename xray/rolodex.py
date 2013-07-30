@@ -200,6 +200,6 @@ class Rolodex(object):
                 session = SessionStore(session_key=cookie['sessionid'])
                 if session.exists(cookie['sessionid']):
                     session.load()
-                    uid = session.get('_auth_user_id')
+                    uid = self.xid(str(session.get('_auth_user_id')))
         self._seen_bid(bid, uid, sid)
         return {'uid': uid, 'bid': bid, 'sid': sid}
