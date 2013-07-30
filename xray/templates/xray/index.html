@@ -3,72 +3,32 @@
 {% load xray_tags %}
 
 {% block extra_stylesheets %}
-<link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
-<style>
-  div.content {
-     background: {{ web_xray_dashboard_background_color_variant }};
-  }
-  div.stats {
-    background-color: #FFF;
-    padding: 1em;
-    text-align: center;
-    border-radius: 10px;
-    -moz-border-radius: 10px;
-    -webkit-border-radius: 10px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-    text-shadow: 0 1px rgba(255, 255, 255, 0.85);
-  }
-  div.stats ul {
-    background-color: #FFFFE0;
-    margin: 0px 0px 0px 0px;
-  }
-  div.stats ul > li {
-    list-style: none;
-    display: inline-block;
-    margin-top: 2em;
-    line-height: 600%;
-  }
-  div.stats li:first-child {
-    margin-top: 0;
-  }
-  div.stats span.pic{
-     margin-right: 1em;
-     color: #666;
-  }
-  div.stats span.value {
-     font-size: 400%;
-     font-weight: bold;
-  }
-  div.stats span.caption{
-     font-size: 125%;
-  }
-</style>
+  <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}xray/stylesheets/xray.css" />
 {% endblock extra_stylesheets %}
 
-{% block title %}{{ web_xray_dashboard_title_variant }}{% endblock title %}
+{% block title %}RapidSMS X-ray{% endblock title %}
 {% block content %}
-    <div class="page-header"><h1>{{ web_xray_dashboard_title_variant }}</h1></div>
-      <div class="span5 stats">
+    <div class="page-header"><h1>RapidSMS X-ray</h1></div>
+      <div class="span5 stats relief">
 	<a href="{% url 'xray_experiments' %}">
 	<h3>Experiments</h3>
 	<ul>
           <li>
-	  <span class="pic"><i class="icon-beaker icon-3x"></i></span><span class="value">{{ experiments }}</span> <span class="caption">experiments</span>
+	  <span class="pic"><i class="{{ web_xray_dashboard_experiments_icon_variant }} icon-3x"></i></span><span class="value">{{ experiments }}</span> <span class="caption">experiments</span>
           </li>
 	</ul>
         </a>
       </div>
-      <div class="span5 stats">
+      <div class="span5 stats relief">
 	<a href="{% url 'xray_events' %}">
 	<h3>Events</h3>
 	<ul>
 	  <li>
-	  <span class="pic"><i class="icon-laptop icon-3x"></i></span><span class="value">{{ web_active }}</span> <span class="caption">active web users this week</span>
+	  <span class="pic"><i class="{{ web_xray_dashboard_web_icon_variant }} icon-3x"></i></span><span class="value">{{ web_active }}</span> <span class="caption">active web users this week</span>
           </li>
 	  <li>
-	  <span class="pic"><i class="icon-mobile-phone icon-3x"></i></span><span class="value">{{ sms_active }}</span> <span class="caption">active sms users this week</span>
+	  <span class="pic"><i class="{{ web_xray_dashboard_phone_icon_variant }} icon-3x"></i></span><span class="value">{{ sms_active }}</span> <span class="caption">active sms users this week</span>
           </li>
 	</ul>
         </a>

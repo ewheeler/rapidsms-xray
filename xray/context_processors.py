@@ -4,23 +4,30 @@ def web_experiments(request):
 
     experiments = {}
 
-    experiments['web_xray_dashboard_background_color_variant'] = cleaver(
-        'web_xray_dashboard_background_color',
-        ('white', '#FFFFFF'),
-        ('grey', '#F3F3F3')
+    experiments['web_xray_dashboard_experiments_icon_variant'] = cleaver(
+        'web_xray_dashboard_experiments_icon',
+        ('beaker', 'icon-beaker'),
+        ('stethoscope', 'icon-stethoscope')
+    )
+
+    experiments['web_xray_dashboard_phone_icon_variant'] = cleaver(
+        'web_xray_dashboard_phone_icon',
+        ('mobile-phone', 'icon-mobile-phone'),
+        ('phone', 'icon-phone'),
+        ('phone-sign', 'icon-phone-sign')
+    )
+
+    experiments['web_xray_dashboard_web_icon_variant'] = cleaver(
+        'web_xray_dashboard_web_icon',
+        ('laptop', 'icon-laptop'),
+        ('desktop', 'icon-desktop')
     )
 
     if request.path == '/xray/events/':
-        cleaver.score('web_xray_dashboard_background_color')
-
-    experiments['web_xray_dashboard_title_variant'] = cleaver(
-        'web_xray_dashboard_title',
-        ('RapidSMS Xray', 'RapidSMS Xray'),
-        ('RapidSMS X-ray', 'RapidSMS X-ray'),
-        ('X-ray dashboard', 'X-ray dashboard')
-    )
+        cleaver.score('web_xray_dashboard_phone_icon')
+        cleaver.score('web_xray_dashboard_web_icon')
 
     if request.path == '/xray/experiments/':
-        cleaver.score('web_xray_dashboard_title')
+        cleaver.score('web_xray_dashboard_experiments_icon')
 
     return experiments
