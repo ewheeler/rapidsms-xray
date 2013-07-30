@@ -65,8 +65,14 @@ def _experiment_data(experiment):
         variant_data = {
             'name': variant_name,
             'is_control': (variant_name == experiment.control),
-            'participants': experiment.participants_for(variant),
-            'conversions': experiment.conversions_for(variant),
+            # experiment.participants_for uses an unbustable cache,
+            # so call the backend method directly
+            'participants': experiment.backend.participants(experiment.name,
+                                                            variant_name),
+            # experiment.conversions_for uses an unbustable cache,
+            # so call the backend method directly
+            'conversions': experiment.backend.conversions(experiment.name,
+                                                          variant_name),
             'conversion_rate': format_percentage(variant.conversion_rate),
             'z_score': variant.z_score,
             'confidence_level': variant.confidence_level,
