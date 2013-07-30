@@ -54,7 +54,8 @@ def _experiment_data(experiment):
         'conversions': experiment.conversions,
         'control_conversion_rate': control.conversion_rate,
     }
-    variants_data = {}
+    # list of tuples bc template expects control to be first
+    variants_data = []
     for variant_name in experiment.variants:
         variant = VariantStat(variant_name, experiment)
         improvement_from_control = None
@@ -62,6 +63,7 @@ def _experiment_data(experiment):
             improvement_from_control =\
                 format_percentage(abs((variant.conversion_rate /
                                        control.conversion_rate) - 1))
+
         variant_data = {
             'name': variant_name,
             'is_control': (variant_name == experiment.control),
@@ -78,7 +80,7 @@ def _experiment_data(experiment):
             'confidence_level': variant.confidence_level,
             'improvement_from_control': improvement_from_control,
         }
-        variants_data.update({variant_name: variant_data})
+        variants_data.append((variant_name, variant_data))
     data.update({'variants': variants_data})
     return data
 

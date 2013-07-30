@@ -137,7 +137,9 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {% for variant_name, v in e.variants.items %}
+                    {% for tuple in e.variants %}
+		      {% with tuple.0 as variant_name %}
+		      {% with tuple.1 as v %}
                            {% if forloop.first %}
                            <tr>
                                 <td class="left"><b>Control</b></td>
@@ -160,17 +162,13 @@
                                 {{ v.conversion_rate|default_if_none:"-" }}
                             </td>
                             <td>
-                                {% if e.control_conversion_rate > 0 and not v.is_control %}
-                                    {% if v.conversion_rate > e.control_conversion_rate %}
-                                        <span class="better">
-                                            {{ v.improvement_from_control|default_if_none:"-" }}
-                                        </span>
-                                    {% else %}
-                                        - 
-                                    {% endif %}
-                                {% elif v.is_control %}
+                                {% if v.is_control %}
                                     N/A
-                                {% elif e.control_conversion_rate == 0%}
+                                {% elif e.control_conversion_rate > 0.0 and v.conversion_rate > e.control_conversion_rate %}
+				    <span class="better">
+					{{ v.improvement_from_control|default_if_none:"-" }}
+				    </span>
+                                {% else %}
                                     -
                                 {% endif %}
                             </td>
@@ -180,6 +178,8 @@
                                 {% endif %}
                             </td>
                         </tr>
+		      {% endwith %}
+		      {% endwith %}
                     {% endfor %}
                     <tr class="last">
                         <td class="left"><b>Total</b></td>
