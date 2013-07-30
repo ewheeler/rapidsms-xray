@@ -16,11 +16,11 @@ def alphabet(index):
 def cell_style(prct):
     if prct:
         prct = float(prct)
-        color = ("color: hsla(200, 100%%, 0%%, %d);" %
-                 round(float(prct / 100) + 0.5, 1))
-        background = ("background-color: hsla(200, 80%%, 50%%, %d);" %
-                      round(float(prct / 100), 1))
-        return color + background
+        color = (" color: hsla(200, 100%%, 0%%, %.2f);" %
+                 ((prct / 100.0) + 0.5))
+        background = ("background-color: hsla(200, 80%%, 50%%, %.2f);" %
+                      (prct / 100.0))
+        return background + color
     return ""
 
 
