@@ -98,6 +98,7 @@ def experiments(request):
 def experiments_json(request):
     cleaver = request.environ['cleaver']
     tracker.web_event('view_experiments_json', cleaver.identity)
+    tracker.web_event('active', cleaver.identity)
     return HttpResponse(json.dumps(_experiments_data(), cls=DjangoJSONEncoder),
                         mimetype="application/json")
 
@@ -125,6 +126,10 @@ def events(request):
     web_dates = _events_dates(web_events)
     sms_dates = _events_dates(sms_events)
 
+    cleaver = request.environ['cleaver']
+    tracker.web_event('view_events', cleaver.identity)
+    tracker.web_event('active', cleaver.identity)
+
     return render_to_response(
         "xray/events_form.html",
         {"web_events": set([(e.name, e.display) for e in web_events]),
@@ -137,25 +142,45 @@ def events(request):
 def events_data(request):
     event_kind = request.GET.get('event_kind')
     assert event_kind in ['web', 'sms']
+
+    select1 = request.GET.get('%s_select1' % event_kind)
+    select1 = "xray:%s:%s" % (event_kind, select1)
+
+    select2 = request.GET.get('%s_select2' % event_kind)
+    select2 = "xray:%s:%s" % (event_kind, select2)
+
     time_group = request.GET.get('%s_time_group' % event_kind)
-    data = cohort.get_dates_data(select1=request.GET.get('%s_select1' %
-                                                         event_kind),
-                                 select2=request.GET.get('%s_select2' %
-                                                         event_kind),
+
+    data = cohort.get_dates_data(select1=select1,
+                                 select2=select2,
                                  time_group=time_group,
                                  system='rapidsms-xray')
 
-    averages = defaultdict(int)
-
+    """
+    column_counter = defaultdict(int)
+    column_averages = []
     for column in xrange(2, 15):
         for row in data:
             if row[column]:
-                averages['%d-count' % column] += 1
-                averages['%d-total' % column] += row[column]
+                column_counter['%d-count' % column] += 1
+                column_counter['%d-total' % column] += row[column]
+        if column_counter['%d-count' % column] > 0:
+            column_averages.append(float(column_counter['%d-total' % column]) /
+                                   column_counter['%d-count' % column])
+        else:
+            column_averages.append('')
+    """
+
+    cleaver = request.environ['cleaver']
+    tracker.web_event('view_events_data', cleaver.identity)
+    tracker.web_event('active', cleaver.identity)
 
     return render_to_response(
         "xray/events_data.html",
         {"dates_data": data,
          "time_group": time_group,
-         "averages": averages},
+         "select1": select1,
+         "select2": select2,
+         #"averages": column_averages,
+         "as_percent": True},
         context_instance=RequestContext(request))

@@ -7,21 +7,22 @@
 {% block title %}Event Reports{% endblock title %}
 
 {% block extra_stylesheets %}
-    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}xray/stylesheets/xray.css" />
-<style>
-  div.event_data {
-    margin-top: 60px;
-  }
-</style>
-   
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}xray/stylesheets/xray.css" />
 {% endblock extra_stylesheets %}
 
 {% block content %}
 <div class="span12 event_data">
+<div class="page-header"><h3>Event cohorts</h3></div>
 <table class="cohort_table" cellpadding="0" cellspacing="0">
     <thead>
     <tr>
-        <th width="200"></th>
+	<th><span class="event_name">{{ select1 }}</span></th>
+        <th>People</th>
+	<th colspan=13>{{ time_group|capfirst }}&nbsp;later&nbsp;<span class="event_name">{{ select2 }}</span></th>
+    </tr>
+    <tr>
+	<th></th>
+	<th></th>
         {% mkrange 13 as range13 %}
         {% for i in range13 %}
             <th class="entry">{{ i }}</th>
@@ -29,34 +30,33 @@
     </tr>
     </thead>
 
-    {% mkrange 2 15 1 as range2_15 %}
     <tbody>
     {% for row_data in dates_data %}
         <tr style="background:{% cycle '#EFF9FB' '#FFF' %};">
             <td> 
                 <div class="date">
                   {% if time_group == 'months' %}
-                      {{ row_data.0|date:'b' }}
+                      {{ row_data.0|date:'b Y'|capfirst }}
                   {% elif time_group == 'weeks' %}
                       Week&nbsp;{{ row_data.0|date:'W (d b)' }}
                   {% else %}
                       {{ row_data.0|date:'d b Y' }}
                   {% endif %}
                 </div>
-
+            </td>
+            <td>
                 <div class="total_count">{{ row_data.1 }}</div>
             </td>
 
-            {% for i in range2_15 %}
-
-                {% if row_data.i != '' %}
-                    {% if as_precent %}
-                        <td style="{{ row_data.i|cell_style }}">
-                            {{ row_data.i|floatformat:2 }}
+	    {% for i in row_data|slice:"2:" %}
+                {% if i != '' %}
+                    {% if as_percent %}
+                        <td style="{{ i|cell_style }}">
+                            {{ i|floatformat:2 }}
                         </td>
                     {% else %}
                         <td>
-                            {{ row_data.i|intcomma }}
+                            {{ i|intcomma }}
                         </td>
                     {% endif %}
                 {% else %}
@@ -67,20 +67,22 @@
     {% endfor %}
 
     {% if time_group != 'days' %}
-    <tr>
+    {% if averages %}
+    <tr class="avg_row">
 
-        <td class="avg_row"></td>
+        <td colspan=2></td>
 
         {% for avg in averages %}
-            <td class="avg_row">
-                {% if as_precent %}
-                    {{ avg|floatformat:2 %}
+            <td>
+                {% if as_percent %}
+                    {{ avg|floatformat:2 }}
                 {% else %}
-                    {{ avg|intcomma %}
+                    {{ avg|intcomma }}
                 {% endif %}
             </td>
         {% endfor %}
     </tr>
+    {% endif %}
     {% endif %}
     </tbody>
 </table>

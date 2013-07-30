@@ -14,11 +14,14 @@ def alphabet(index):
 
 @register.filter
 def cell_style(prct):
-    color = ('color: hsla(200, 100%%, 0%%, %s);' %
-             round(float(prct / 100) + 0.5, 1))
-    background = ("background-color: hsla(200, 80%, 50%, %s);" %
-                  round(float(prct, 100), 1))
-    return color + background
+    if prct:
+        prct = float(prct)
+        color = ("color: hsla(200, 100%%, 0%%, %d);" %
+                 round(float(prct / 100) + 0.5, 1))
+        background = ("background-color: hsla(200, 80%%, 50%%, %d);" %
+                      round(float(prct / 100), 1))
+        return color + background
+    return ""
 
 
 # the following is from: http://djangosnippets.org/snippets/2147/

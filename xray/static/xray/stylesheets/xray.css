@@ -1,6 +1,52 @@
+.relief {
+  background-color: #FFF;
+  padding: 1em;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px rgba(255, 255, 255, 0.85);
+}
+
+div.stats {
+  text-align: center;
+}
+
+div.stats ul {
+  background-color: #FFFFE0;
+  margin: 0px 0px 0px 0px;
+}
+
+div.stats ul > li {
+  list-style: none;
+  display: inline-block;
+  margin-top: 2em;
+  line-height: 600%;
+}
+
+div.stats li:first-child {
+  margin-top: 0;
+}
+
+div.stats span.pic{
+  margin-right: 1em;
+  color: #666;
+}
+
+div.stats span.value {
+  font-size: 400%;
+  font-weight: bold;
+}
+
+div.stats span.caption{
+  font-size: 125%;
+}
+
 .cohort_table {
-  width: 1250px !important;
-  font-family: sans-serif;
+  width: 100%;
+  font-family: courier, monospace;
   background-color: #F9F9F9;
 }
 
@@ -8,27 +54,38 @@
     width: 6%;
 }
 
+.cohort_table thead {
+    background-color: #FFFFE0;
+}
+
+.cohort_table thead th {
+  padding: 0px 0.5em 0px 0.5em;
+}
+
 .cohort_table td, .cohort_table th {
     padding: 5px 0;
     text-align: center;
-    border-right: 1px solid #aaa;
-}
-
-.cohort_table td {
-    border-bottom: 1px solid #aaa;
+    border: 1px solid #aaa;
 }
 
 .cohort_table .date {
-    display: inline-block;
-    width: 125px;
+  text-align: left;
 }
 
 .cohort_table .total_count {
-    display: inline-block;
-    width: 50px;
+    width: 2em;
 }
 
-.cohort_table td.avg_row {
-    border-top: 1px solid #aaa !important;
+.cohort_table tr.avg_row {
+    background-color: #FFFFE0;
 }
 
+.cohort_table tr.avg_row td {
+    border-top: 1px solid #aaa;
+}
+
+span.event_name {
+  font-family: courier, monospace;
+  font-weight: normal;
+  font-size: 85%;
+}

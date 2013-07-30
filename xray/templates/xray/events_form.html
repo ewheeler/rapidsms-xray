@@ -2,22 +2,132 @@
 {% load url from future %}
 
 {% block extra_stylesheets %}
+  <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
 <style>
-  div.event_forms {
-    margin-top: 60px;
+fieldset {
+    position: relative;
+    padding: 0 ;
+    /*display: inline-block;*/
+    padding-bottom: .5em;
+}
+fieldset > legend {
+    width: 90%;
+    font-size: 150%;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="tel"],
+textarea,
+select {
+    border: 1px solid #CCC;
+    padding: 0;
+    outline: none;
+    margin: .3em 0 1.3em 0;
+    width: 15em;
+    max-width: 100%;
+    display: block;
+    background: #FFF;
   }
-   
+
+form + .bottom {
+    margin-top: 1.5em;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+textarea:focus {
+    border: 1px solid #AAA;
+    color: #444;
+}
+
+textarea {
+    min-height: 4em;
+    width: 80%;
+}
+legend {
+    display: block;
+    font-size: 1.125em;
+    font-weight: bold;
+    margin-bottom: .33em;
+    margin-top: .33em;
+    padding-top: .66em;
+}
+
+label {
+    font-size: 1.125em;
+    display: block;
+    width: 99%;
+    margin-bottom: .33em;
+    margin-top: .33em;
+
+}
+
+label span,
+legend span {
+    font-weight: normal;
+    font-size: 13px;
+    color: #444;
+}
+
+label.with-bottom  {margin-bottom: 1.3em;}
+
+label.with-bottom input {margin-bottom: 0;}
+label .hint { font-size: .8em;}
+
+div.question label:hover {
+  background-color: #FFFDC7;
+}
+div.question label {
+  padding-top: .4em;
+  padding-left: .2em;
+}
+
+div.question label.withtext {
+  display:inline;
+}
+
+input[type="checkbox"] {
+    display: inline;
+    margin: 0 .5em 0 0;
+}
+
+input[type="radio"] {
+    margin-bottom: 10px;
+    margin-right: .8em;
+}
+
+
+form > table, div.module > table {
+    padding: 0;
+    margin: 0 0 1em 0;
+    display: inline-table;
+}
+
+form > p {
+  width: 99%;
+}
+
+form.event_form div.input_group label, select {
+    display: inline;
+}
+
 </style>
+  <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}xray/stylesheets/xray.css" />
 {% endblock extra_stylesheets %}
 
 {% block title %}Event Reports{% endblock title %}
 {% block content %}
-<div class="span12 event_forms">
+<div class="span9 event_forms">
 
-<form action="{% url 'xray_events_data' %} " method="GET">
-    <dl>
-        <dt>Web events</dt>
-            <dd>
+<form class="event_form relief" action="{% url 'xray_events_data' %} " method="GET">
+    <fieldset>
+        <legend><span class="pic"><i class="{{ web_xray_dashboard_web_icon_variant }} icon-3x"></i></span>&nbsp;Web events</legend>
+	<div class="input_group">
+            <label for="web_select1">
             Show me people who 
 
             <select name="web_select1">
@@ -29,7 +139,9 @@
                  {% endif %}
               {% endfor %}
             </select>
+            </label>
 
+	    <label for="web_select2">
             and then came back and
 
             <select name="web_select2">
@@ -41,28 +153,29 @@
                  {% endif %}
               {% endfor %}
             </select>
+            </label>
+        </div>
 
-            </dd>
-
-        <dt>Group by</dt>
-            <dd>
+            <label for="web_time_group">
             Group by 
             <select name="web_time_group">
               {% for date in web_dates %}
                   <option value="{{ date }}">{{ date }}</option>
               {% endfor %}
             </select>
-            </dd>
+            </label>
 
             <input type="hidden" name="event_kind" value="web"/>
-        <dt><input type="submit" value="Show me results" /></dt>
-    </dl>
+            <input type="submit" class="btn btn-primary" value="Show me results" />
+    </fieldset>
 </form>
 
-<form action="{% url 'xray_events_data' %} " method="GET">
-    <dl>
-        <dt>SMS events</dt>
-            <dd>
+<form class="event_form relief" action="{% url 'xray_events_data' %} " method="GET">
+    <fieldset>
+        <legend><span class="pic"><i class="{{ web_xray_dashboard_phone_icon_variant }} icon-3x"></i></span>&nbsp;SMS events</legend>
+
+	<div class="input_group">
+            <label for="sms_select1">
             Show me people who 
 
             <select name="sms_select1">
@@ -74,7 +187,9 @@
                  {% endif %}
               {% endfor %}
             </select>
+            </label>
 
+            <label for="sms_select2">
             and then came back and
 
             <select name="sms_select2">
@@ -87,21 +202,21 @@
               {% endfor %}
             </select>
 
-            </dd>
+            </label>
+        </div>
 
-        <dt>Group by</dt>
-            <dd>
+            <label for="sms_time_group">
             Group by 
             <select name="sms_time_group">
               {% for date in sms_dates %}
                   <option value="{{ date }}">{{ date }}</option>
               {% endfor %}
             </select>
-            </dd>
+            </label>
 
             <input type="hidden" name="event_kind" value="sms"/>
-        <dt><input type="submit" value="Show me results" /></dt>
-    </dl>
+            <input type="submit" class="btn btn-primary" value="Show me results" />
+    </fieldset>
 </form>
 </div>
 {% endblock content %}
