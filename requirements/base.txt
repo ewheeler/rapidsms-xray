@@ -1,4 +1,4 @@
-# use ewheeler fork until RedisBackend is merged upstream
--e git+git://github.com/ewheeler/cleaver.git@track-individual-participation#egg=cleaver
+redis
 phonenumbers
 bitmapist
+cleaver

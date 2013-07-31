@@ -1,18 +1,7 @@
-import os
 from setuptools import setup, find_packages
 
 
-def read_file(filename):
-    """Read a file into a string"""
-    path = os.path.abspath(os.path.dirname(__file__))
-    filepath = os.path.join(path, filename)
-    try:
-        return open(filepath).read()
-    except IOError:
-        return ''
-
-
-requirements = [line for line in read_file('requirements/base.txt').split('\n')]
+requirements = [line.strip('\n') for line in open('requirements/base.txt').readlines()]
 
 setup(
     name='rapidsms-xray',
@@ -21,7 +10,8 @@ setup(
     author_email='evan@leapfrog.io',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['distribute'] + requirements,
+    dependency_links = ['http://github.com/ewheeler/cleaver/tarball/xray#egg=cleaver'],
+    install_requires=requirements,
     url='https://github.com/ewheeler/rapidsms-xray/',
     license='BSD',
     description=u' '.join(__import__('xray').__doc__.splitlines()).strip(),
@@ -36,7 +26,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Operating System :: OS Independent',
     ],
-    long_description=read_file('README.rst'),
-    test_suite='runtests.runtests',
+    #long_description=open('README.rst').readlines(),
+    #test_suite='runtests.runtests',
     zip_safe=False,
 )
