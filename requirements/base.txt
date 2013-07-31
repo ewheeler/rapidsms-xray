@@ -1,4 +1,4 @@
 redis
 phonenumbers
 bitmapist
-cleaver
+cleaver>=0.1.5dev

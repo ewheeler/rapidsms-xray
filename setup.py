@@ -10,7 +10,7 @@ setup(
     author_email='evan@leapfrog.io',
     packages=find_packages(),
     include_package_data=True,
-    dependency_links = ['http://github.com/ewheeler/cleaver/tarball/xray#egg=cleaver'],
+    dependency_links = ['http://github.com/ewheeler/cleaver/tarball/xray#egg=cleaver-0.1.5dev'],
     install_requires=requirements,
     url='https://github.com/ewheeler/rapidsms-xray/',
     license='BSD',
