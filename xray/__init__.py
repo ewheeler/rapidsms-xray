@@ -2,7 +2,11 @@
 
 # import signal receivers here so they are sure
 # to be registered before any signals are emitted
-import listeners
+# ignore ImportError that may be thrown when running setup.py
+try:
+    import listeners
+except ImportError:
+    pass
 
 __version_info__ = {
     'major': 0,
