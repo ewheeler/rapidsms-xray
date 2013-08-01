@@ -13,9 +13,12 @@ class WebIdentityProvider(CleaverIdentityProvider):
         environ['BID'] = identities.get('bid')
         environ['SID'] = identities.get('sid')
         if identities.get('uid') is not None:
+            environ.update({'cleaver_id': identities['uid']})
             return identities['uid']
         if identities.get('bid') is not None:
+            environ.update({'cleaver_id': identities['bid']})
             return identities['bid']
+        environ.update({'cleaver_id': identities['sid']})
         return identities['sid']
 
 
