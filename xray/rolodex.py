@@ -79,14 +79,13 @@ class Rolodex(object):
     # invalid msisdn for country, scored by frequency
     # (sorted set) 'invalid:msisdn:{{ country }}' => ((1234, 22),(5678, 8),...)
 
-    def __init__(self, host='localhost', port=6379, db=4, country='UG'):
+    def __init__(self, host='localhost', port=6379, db=4, prefix="rolodex",
+                 country='UG'):
         assert country in phonenumbers.SUPPORTED_REGIONS
+        self.prefix = prefix
         # TODO allow list of countries?
         self.country = country
         self.redis = redis.Redis(host=host, port=port, db=db)
-        self.identity_counter = self.redis.get('xray_identity_counter')
-        if not self.identity_counter:
-            self.redis.incrby('xray_identity_counter', 1)
 
     def xid(self, hashable):
 
@@ -97,15 +96,16 @@ class Rolodex(object):
 
         hashed = hashlib.md5(hashable).hexdigest()
 
-        existing = self.redis.get('xid:%s' % hashed)
+        existing = self.redis.get('%s:xid:%s' % (self.prefix, hashed))
         if existing:
             return existing
 
         # increment counter
-        integer_id = self.redis.incrby('xray_identity_counter', 1)
+        integer_id = self.redis.incrby('%s:xray_identity_counter' %
+                                       self.prefix, 1)
         # set maps
-        self.redis.set('xid:%s' % hashed, integer_id)
-        self.redis.set('xid:%s' % integer_id, hashed)
+        self.redis.set('%s:xid:%s' % (self.prefix, hashed), integer_id)
+        self.redis.set('%s:xid:%s' % (self.prefix, integer_id), hashed)
         return integer_id
 
     def format_msisdn(self, msisdn=None):
@@ -117,7 +117,8 @@ class Rolodex(object):
             #raise RuntimeError("%s is not a valid number for %s"
             #                   % (msisdn, self.country))
             # create or increment count of  invalid number
-            self.redis.zadd('invalid:msisdn:%s' % self.country, msisdn, 1.0)
+            self.redis.zadd('%s:invalid:msisdn:%s' %
+                            (self.prefix, self.country), msisdn, 1.0)
             return msisdn
         return phonenumbers.format_number(num,
                                           phonenumbers.PhoneNumberFormat.E164)
@@ -127,37 +128,38 @@ class Rolodex(object):
         return self.xid(self.format_msisdn(msisdn))
 
     def _seen_mid_registered(self, mid):
-        self.redis.sadd('midRegistered', mid)
+        self.redis.sadd('%s:midRegistered' % self.prefix, mid)
 
     def _seen_mid(self, mid, e164):
-        self.redis.zincrby('midCounts', mid, 1.0)
-        self.redis.set('e164:%s' % mid, e164)
-        self.redis.sadd('midSeen', mid)
+        self.redis.zincrby('%s:midCounts' % self.prefix, mid, 1.0)
+        self.redis.set('%s:e164:%s' % (self.prefix, mid), e164)
+        self.redis.sadd('%s:midSeen' % self.prefix, mid)
 
     def uid_for_mid(self, mid):
-        return self.redis.get('uid:%s' % mid)
+        return self.redis.get('%s:uid:%s' % (self.prefix, mid))
 
     def mids_for_uid(self, uid):
-        return self.redis.smembers('mids:%s' % uid)
+        return self.redis.smembers('%s:mids:%s' % (self.prefix, uid))
 
     def _seen_bid(self, bid, uid, sid):
-        self.redis.zincrby('bidCounts', bid, 1.0)
+        self.redis.zincrby('%s:bidCounts' % self.prefix, bid)
         if uid is not None:
-            self.redis.hmset('ids:%s' % bid, {'uid': uid, 'sid': sid})
+            self.redis.hmset('%s:ids:%s' % (self.prefix, bid),
+                             {'uid': uid, 'sid': sid})
             # cache only for 2 minutes. if browser activity continues, value
             # will be recached
-            self.redis.expire('ids:%s' % bid, 120)
+            self.redis.expire('%s:ids:%s' % (self.prefix, bid), 120)
             return True
         return None
 
     def ids_for_bid(self, bid):
-        if self.redis.hexists('ids:%s' % bid, 'uid'):
-            return self.redis.hgetall('ids:%s' % bid)
+        if self.redis.hexists('%s:ids:%s' % (self.prefix, bid), 'uid'):
+            return self.redis.hgetall('%s:ids:%s' % (self.prefix, bid))
         return None
 
     def expire_bid(self, bid):
-        if self.redis.exists('ids:%s' % bid):
-            return self.redis.delete('ids:%s' % bid)
+        if self.redis.exists('%s:ids:%s' % (self.prefix, bid)):
+            return self.redis.delete('%s:ids:%s' % (self.prefix, bid))
         return None
 
     def lookup_msisdn(self, msisdn=None):
@@ -189,7 +191,7 @@ class Rolodex(object):
         for header in headers_for_fingerprint:
             header_info.append(headers_up.get(header, ''))
         xid = self.xid(''.join(header_info).replace(' ', ''))
-        return xid
+        return int(xid)
 
     def lookup_browser(self, environ):
         bid = None
