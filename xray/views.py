@@ -7,6 +7,8 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import login_required
 
 from cleaver.experiment import VariantStat
 from cleaver.backend.redis import RedisBackend
@@ -21,6 +23,8 @@ backend = RedisBackend()
 tracker = Tracker()
 
 
+@login_required
+@permission_required('xray.view_events', raise_exception=True)
 def index(request):
     cleaver = request.environ['cleaver']
     tracker.web_event('view_xray_dashboard', cleaver.identity)
@@ -93,6 +97,8 @@ def _experiments_data():
     return experiments_data
 
 
+@login_required
+@permission_required('xray.view_experiments', raise_exception=True)
 def experiments(request):
     cleaver = request.environ['cleaver']
     tracker.web_event('view_experiments', cleaver.identity)
@@ -103,6 +109,8 @@ def experiments(request):
         context_instance=RequestContext(request))
 
 
+@login_required
+@permission_required('xray.view_experiments', raise_exception=True)
 def experiments_json(request):
     cleaver = request.environ['cleaver']
     tracker.web_event('view_experiments_json', cleaver.identity)
@@ -125,6 +133,8 @@ def _events_dates(events):
     return [k for k, v in dates.items() if v]
 
 
+@login_required
+@permission_required('xray.view_events', raise_exception=True)
 def events(request):
     events = tracker.get_events()
 
@@ -147,6 +157,8 @@ def events(request):
         context_instance=RequestContext(request))
 
 
+@login_required
+@permission_required('xray.view_events', raise_exception=True)
 def events_data(request):
     event_kind = request.GET.get('event_kind')
     assert event_kind in ['web', 'sms']
