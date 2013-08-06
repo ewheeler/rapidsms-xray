@@ -26,7 +26,7 @@ setup(
         'Development Status :: 4 - Beta',
         'Operating System :: OS Independent',
     ],
-    long_description=open('README.rst').readlines(),
+    long_description=open('README.rst').read(),
     test_suite='runtests.runtests',
     zip_safe=False,
 )
