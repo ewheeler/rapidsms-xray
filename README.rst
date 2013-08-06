@@ -91,8 +91,8 @@ additional information.
 See `xray/app.py
 <https://github.com/ewheeler/rapidsms-xray/blob/master/xray/app.py>`_
 and `xray/views.py 
-<https://github.com/ewheeler/rapidsms-xray/blob/master/xray/views.py>`_
- for example usage.
+<https://github.com/ewheeler/rapidsms-xray/blob/master/xray/views.py>`_ for example usage.
+
 
 When performing custom event analysis, use the *Events classes (with separate
 Web* and SMS* classes for each time period) in `xray.events` rather than the
