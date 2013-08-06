@@ -25,7 +25,6 @@ class RolodexWebIDTest(RolodexTest):
         setup_testing_defaults(environ_one)
 
         browser_one_ids = self.rolodex.lookup_browser(environ_one)
-        debug(browser_one_ids)
         assert browser_one_ids['bid'] == 1
 
         browser_count = self.rolodex_db.zrange('%s:bidCounts' % self.prefix,
