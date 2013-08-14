@@ -1,4 +1,4 @@
 redis
-phonenumbers
+phonenumbers>=5.7b2
 bitmapist
 cleaver>=0.1.5dev
