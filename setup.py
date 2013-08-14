@@ -11,6 +11,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     dependency_links = ['http://github.com/ewheeler/cleaver/tarball/xray#egg=cleaver-0.1.5dev'],
+    setup_requires=['Django',],
     install_requires=requirements,
     url='https://github.com/ewheeler/rapidsms-xray/',
     license='BSD',
