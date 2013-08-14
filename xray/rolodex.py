@@ -5,9 +5,6 @@ import phonenumbers
 
 from django.conf import settings
 
-SessionStore = __import__(settings.SESSION_ENGINE,
-                          fromlist=['']).SessionStore
-
 # thanks to:
 # http://mobiforge.com/forum/running/analytics/
 # stats-and-unique-vistors-different-mobile
@@ -86,6 +83,9 @@ class Rolodex(object):
         # TODO allow list of countries?
         self.country = country
         self.redis = redis.Redis(host=host, port=port, db=db)
+        self.SessionStore = __import__(settings.SESSION_ENGINE,
+                                       fromlist=['']).SessionStore
+
 
     def xid(self, hashable):
 
@@ -211,7 +211,7 @@ class Rolodex(object):
             if 'sessionid' in cookie:
                 sid = self.xid(cookie['sessionid'])
                 environ['SID'] = sid
-                session = SessionStore(session_key=cookie['sessionid'])
+                session = self.SessionStore(session_key=cookie['sessionid'])
                 if session.exists(cookie['sessionid']):
                     session.load()
                     uid = self.xid(str(session.get('_auth_user_id')))
