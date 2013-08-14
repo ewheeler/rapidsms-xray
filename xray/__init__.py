@@ -2,21 +2,18 @@
 
 # import signal receivers here so they are sure
 # to be registered before any signals are emitted
-# ignore ImportError and ImproperlyConfigured exceptions
+# ignore ImportError (TODO or any other...) exception
 # that may be thrown when running setup.py
 
-from django.core import exceptions
 try:
     import listeners
-except ImportError:
-    pass
-except exceptions.ImproperlyConfigured:
+except Exception:
     pass
 
 __version_info__ = {
     'major': 0,
     'minor': 5,
-    'micro': 7,
+    'micro': 8,
     'releaselevel': 'beta',
     'serial': 0
 }
