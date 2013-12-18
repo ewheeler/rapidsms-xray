@@ -1,8 +1,10 @@
 
 def web_experiments(request):
-    cleaver = request.environ['cleaver']
-
+    cleaver = request.environ.get('cleaver')
     experiments = {}
+
+    if cleaver is None:
+        return experiments
 
     experiments['web_xray_dashboard_experiments_icon_variant'] = cleaver(
         'web_xray_dashboard_experiments_icon',

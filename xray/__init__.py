@@ -13,7 +13,7 @@ except Exception:
 __version_info__ = {
     'major': 0,
     'minor': 5,
-    'micro': 8,
+    'micro': 9,
     'releaselevel': 'beta',
     'serial': 0
 }
